@@ -1,46 +1,21 @@
 package app
 
 import (
-	"bytes"
-	_ "embed"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/szaryse/timer-go255/timer"
-	"log"
+	"github.com/szaryse/timer-go255/ui"
 )
-
-//go:embed ..\assets\fonts\FiraCodeRegular.ttf
-var FiraCodeRegular []byte
-
-//go:embed ..\assets\fonts\DotoRegular.ttf
-var DotoRegular []byte
-
-var (
-	firaCodeSource *text.GoTextFaceSource
-	dotoSource     *text.GoTextFaceSource
-)
-
-func init() {
-	fcs, err := text.NewGoTextFaceSource(bytes.NewReader(FiraCodeRegular))
-	if err != nil {
-		log.Fatal(err)
-	}
-	firaCodeSource = fcs
-
-	ds, err := text.NewGoTextFaceSource(bytes.NewReader(DotoRegular))
-	if err != nil {
-		log.Fatal(err)
-	}
-	dotoSource = ds
-}
 
 type App struct {
 	timer timer.Timer
+	ui    ui.UI
 }
 
 func NewApp() App {
-	timer.NewTimer()
-	return App{}
+	return App{
+		timer: timer.NewTimer(),
+		ui:    ui.CreateUI(),
+	}
 }
 
 func (app *App) Update() error {
@@ -48,11 +23,15 @@ func (app *App) Update() error {
 	if err != nil {
 		return err
 	}
+	err = app.ui.Update()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (app *App) Draw(screen *ebiten.Image) {
-	app.timer.Render(screen, firaCodeSource, dotoSource)
+	app.ui.Render(screen, &app.timer)
 }
 
 func (app *App) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

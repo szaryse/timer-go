@@ -14,14 +14,7 @@ import (
 
 //go:embed ..\assets\fonts\FiraCodeRegular.ttf
 var FiraCodeRegular []byte
-
-//go:embed ..\assets\fonts\DotoRegular.ttf
-var DotoRegular []byte
-
-var (
-	firaCodeSource *text.GoTextFaceSource
-	dotoSource     *text.GoTextFaceSource
-)
+var firaCodeSource *text.GoTextFaceSource
 
 func init() {
 	fcs, err := text.NewGoTextFaceSource(bytes.NewReader(FiraCodeRegular))
@@ -29,7 +22,13 @@ func init() {
 		log.Fatal(err)
 	}
 	firaCodeSource = fcs
+}
 
+//go:embed ..\assets\fonts\DotoRegular.ttf
+var DotoRegular []byte
+var dotoSource *text.GoTextFaceSource
+
+func init() {
 	ds, err := text.NewGoTextFaceSource(bytes.NewReader(DotoRegular))
 	if err != nil {
 		log.Fatal(err)
@@ -40,7 +39,7 @@ func init() {
 type ViewState int
 
 const (
-	SettingsView = iota
+	SettingsView ViewState = iota
 	TimerView
 )
 
@@ -50,6 +49,8 @@ const (
 	TimerWidth     = 960
 	TimerHeight    = 240
 )
+
+var TextColor = color.Gray{Y: 192}
 
 type UI struct {
 	CurrentView     ViewState
@@ -62,22 +63,15 @@ func CreateUI() UI {
 }
 
 func (ui *UI) Render(screen *ebiten.Image, t *timer.Timer) {
-	// todo create the settings view
+	ui.DrawBackground(screen)
 	if ui.CurrentView == SettingsView {
-		op := &text.DrawOptions{}
-		op.GeoM.Translate(0, 0)
-		op.ColorScale.ScaleWithColor(color.White)
-		status := "TEST"
-		text.Draw(screen, status, &text.GoTextFace{
-			Source: dotoSource,
-			Size:   24,
-		}, op)
+		ui.RenderSettingView(screen)
 	}
 	// todo create the timer view
 	if ui.CurrentView == TimerView {
 		op := &text.DrawOptions{}
 		op.GeoM.Translate(50, 60)
-		op.ColorScale.ScaleWithColor(color.White)
+		op.ColorScale.ScaleWithColor(TextColor)
 		time := fmt.Sprintf("%d", t.Count/60)
 		text.Draw(screen, time, &text.GoTextFace{
 			Source: firaCodeSource,

@@ -19,12 +19,10 @@ func NewApp() App {
 }
 
 func (app *App) Update() error {
-	err := app.timer.Update()
-	if err != nil {
+	if err := app.timer.Update(); err != nil {
 		return err
 	}
-	err = app.ui.Update()
-	if err != nil {
+	if err := app.ui.Update(); err != nil {
 		return err
 	}
 	return nil

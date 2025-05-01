@@ -50,16 +50,23 @@ const (
 	TimerHeight    = 240
 )
 
-var TextColor = color.Gray{Y: 192}
+var (
+	TextColor    = color.Gray{Y: 192}
+	PrimaryColor = color.RGBA{R: 0x00, G: 0x80, B: 0x00, A: 0xff}
+)
 
 type UI struct {
 	CurrentView     ViewState
 	WindowPositionX int
 	WindowPositionY int
+	SettingsButtons [12]Button
 }
 
 func CreateUI() UI {
-	return UI{CurrentView: SettingsView}
+	return UI{
+		CurrentView:     SettingsView,
+		SettingsButtons: createSettingsButtons(),
+	}
 }
 
 func (ui *UI) Render(screen *ebiten.Image, t *timer.Timer) {

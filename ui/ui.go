@@ -44,8 +44,8 @@ const (
 )
 
 const (
-	SettingsWidth  = 640
-	SettingsHeight = 480
+	SettingsWidth  = 440
+	SettingsHeight = 220
 	TimerWidth     = 960
 	TimerHeight    = 240
 )
@@ -89,7 +89,29 @@ func (ui *UI) Render(screen *ebiten.Image, t *timer.Timer) {
 
 func (ui *UI) Update() error {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		ui.changeView()
+		if ui.CurrentView == TimerView {
+			ui.changeView()
+		}
+		if ui.CurrentView == SettingsView {
+			ex, ey := ebiten.CursorPosition()
+
+			for idx, button := range ui.SettingsButtons {
+				if ex > button.x &&
+					ex < button.x+button.w &&
+					ey > button.y &&
+					ey < button.y+button.h {
+					fmt.Println(idx, button.action)
+					// todo
+					//switch idx {
+					//case 10:
+					//	fmt.Println("exit")
+					//case 11:
+					//	fmt.Println("start")
+					//	ui.changeView()
+					//}
+				}
+			}
+		}
 	}
 	return nil
 }

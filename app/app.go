@@ -19,10 +19,13 @@ func NewApp() App {
 }
 
 func (app *App) Update() error {
-	if err := app.timer.Update(); err != nil {
+	if err := app.ui.Update(); err != nil {
 		return err
 	}
-	if err := app.ui.Update(); err != nil {
+	// todo
+	// action := checkUiAction
+	// changeTimerState(action)
+	if err := app.timer.Update(); err != nil {
 		return err
 	}
 	return nil

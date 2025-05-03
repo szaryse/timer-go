@@ -22,9 +22,9 @@ func (app *App) Update() error {
 	if err := app.ui.Update(); err != nil {
 		return err
 	}
-	// todo
-	// action := checkUiAction
-	// changeTimerState(action)
+	if err := app.ui.ActionUpdate(&app.timer); err != nil {
+		return err
+	}
 	if err := app.timer.Update(); err != nil {
 		return err
 	}

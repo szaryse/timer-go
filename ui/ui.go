@@ -44,15 +44,17 @@ const (
 )
 
 const (
+	BgPadding      = 4
 	SettingsWidth  = 440
 	SettingsHeight = 220
-	TimerWidth     = 960
-	TimerHeight    = 240
+	TimerWidth     = 440
+	TimerHeight    = 54 + 2*BgPadding
 )
 
 var (
 	TextColor    = color.Gray{Y: 192}
 	PrimaryColor = color.RGBA{R: 0x00, G: 0x80, B: 0x00, A: 0xff}
+	bgColor      = color.RGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xc0}
 )
 
 type UI struct {
@@ -60,6 +62,7 @@ type UI struct {
 	WindowPositionX int
 	WindowPositionY int
 	SettingsButtons [12]Button
+	SelectedAction  string
 }
 
 func CreateUI() UI {
@@ -72,14 +75,14 @@ func CreateUI() UI {
 func (ui *UI) Render(screen *ebiten.Image, t *timer.Timer) {
 	ui.DrawBackground(screen)
 	if ui.CurrentView == SettingsView {
-		ui.RenderSettingView(screen)
+		ui.RenderSettingView(screen, t)
 	}
-	// todo create the timer view
+	// todo #1 create the timer view
 	if ui.CurrentView == TimerView {
 		op := &text.DrawOptions{}
-		op.GeoM.Translate(50, 60)
+		op.GeoM.Translate(0, 0)
 		op.ColorScale.ScaleWithColor(TextColor)
-		time := fmt.Sprintf("%d", t.Count/60)
+		time := formatFullTime(t.Count / timer.Tick)
 		text.Draw(screen, time, &text.GoTextFace{
 			Source: firaCodeSource,
 			Size:   24,
@@ -93,25 +96,35 @@ func (ui *UI) Update() error {
 			ui.changeView()
 		}
 		if ui.CurrentView == SettingsView {
-			ex, ey := ebiten.CursorPosition()
+			ui.handleClickOnSettings()
+		}
+	}
+	return nil
+}
 
-			for idx, button := range ui.SettingsButtons {
-				if ex > button.x &&
-					ex < button.x+button.w &&
-					ey > button.y &&
-					ey < button.y+button.h {
-					fmt.Println(idx, button.action)
-					// todo
-					//switch idx {
-					//case 10:
-					//	fmt.Println("exit")
-					//case 11:
-					//	fmt.Println("start")
-					//	ui.changeView()
-					//}
-				}
+func (ui *UI) handleClickOnSettings() {
+	cursorX, cursorY := ebiten.CursorPosition()
+	for _, button := range ui.SettingsButtons {
+		if cursorX > button.x &&
+			cursorX < button.x+button.w &&
+			cursorY > button.y &&
+			cursorY < button.y+button.h {
+			ui.SelectedAction = button.action
+			if button.action == "start" {
+				ui.changeView()
 			}
 		}
+	}
+}
+
+func (ui *UI) ActionUpdate(t *timer.Timer) error {
+	action := ui.SelectedAction
+	if len(action) > 0 {
+		if action == "exit" {
+			return ebiten.Termination
+		}
+		t.HandleAction(action)
+		ui.SelectedAction = ""
 	}
 	return nil
 }

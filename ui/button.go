@@ -36,8 +36,8 @@ func createSettingsButtons() [12]Button {
 	buttons[5] = createButton(btnRx, "-", "decreaseFocus")
 	buttons[6] = createButton(btnLx, "+", "increaseBreak")
 	buttons[7] = createButton(btnRx, "-", "decreaseBreak")
-	buttons[8] = createButton(70, "Exit", "Exit")
-	buttons[9] = createButton(260, "Start", "Start")
+	buttons[8] = createButton(70, "Exit", "exit")
+	buttons[9] = createButton(260, "Start", "start")
 
 	for idx := range buttons {
 		buttons[idx].w = buttonWidth

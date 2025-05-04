@@ -9,14 +9,25 @@ const (
 	Tick              = 60
 )
 
+type ActivityState int
+
+const (
+	StartingInState ActivityState = iota
+	FocusState
+	BreakState
+	TimeoutState
+)
+
 type Timer struct {
 	Count         int
+	TotalCount    int
 	StartInTime   int
 	SessionNumber int
 	FocusTime     int
 	BreakTime     int
 	StreamTime    int
 	IsRunning     bool
+	Activity      ActivityState
 }
 
 func NewTimer() (timer Timer) {
@@ -25,9 +36,9 @@ func NewTimer() (timer Timer) {
 		SessionNumber: sessionNumber,
 		FocusTime:     focusTime,
 		BreakTime:     breakTime,
+		Activity:      StartingInState,
 	}
 	streamTime := (sessionNumber * (focusTime + breakTime)) + startInTime
-	timer.Count = streamTime * Tick
 	timer.StreamTime = streamTime
 	return
 }
@@ -35,6 +46,8 @@ func NewTimer() (timer Timer) {
 func (t *Timer) Update() error {
 	if t.IsRunning {
 		t.Count -= 1
+		t.TotalCount -= 1
+		// todo logic
 	}
 	return nil
 }
@@ -59,13 +72,14 @@ func (t *Timer) HandleAction(action string) {
 		t.BreakTime = setTime(t.BreakTime - 60)
 	case "start":
 		t.IsRunning = true
+		t.Count = startInTime * Tick
+		t.TotalCount = t.StreamTime * Tick
 	}
 	t.calcStreamTime()
 }
 
 func (t *Timer) calcStreamTime() {
 	t.StreamTime = (t.SessionNumber * (t.FocusTime + t.BreakTime)) + t.StartInTime
-	t.Count = t.StreamTime * Tick
 }
 
 func setTime(time int) int {

@@ -44,16 +44,19 @@ const (
 )
 
 const (
-	BgPadding      = 4
 	SettingsWidth  = 440
 	SettingsHeight = 220
-	TimerWidth     = 440
+	TimerWidth     = 640
+	BgPadding      = 4
 	TimerHeight    = 54 + 2*BgPadding
+	leftX          = 10 // left padding x (inside background)
 )
 
 var (
 	TextColor    = color.Gray{Y: 192}
 	PrimaryColor = color.RGBA{R: 0x00, G: 0x80, B: 0x00, A: 0xff}
+	CyanColor    = color.RGBA{R: 0x00, G: 0xff, B: 0xff, A: 0xff}
+	RedColor     = color.RGBA{R: 0xff, G: 0x00, B: 0x00, A: 0xff}
 	bgColor      = color.RGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xc0}
 )
 
@@ -77,16 +80,8 @@ func (ui *UI) Render(screen *ebiten.Image, t *timer.Timer) {
 	if ui.CurrentView == SettingsView {
 		ui.RenderSettingView(screen, t)
 	}
-	// todo #1 create the timer view
 	if ui.CurrentView == TimerView {
-		op := &text.DrawOptions{}
-		op.GeoM.Translate(0, 0)
-		op.ColorScale.ScaleWithColor(TextColor)
-		time := formatFullTime(t.Count / timer.Tick)
-		text.Draw(screen, time, &text.GoTextFace{
-			Source: firaCodeSource,
-			Size:   24,
-		}, op)
+		ui.RenderTimerView(screen, t)
 	}
 }
 
@@ -100,21 +95,6 @@ func (ui *UI) Update() error {
 		}
 	}
 	return nil
-}
-
-func (ui *UI) handleClickOnSettings() {
-	cursorX, cursorY := ebiten.CursorPosition()
-	for _, button := range ui.SettingsButtons {
-		if cursorX > button.x &&
-			cursorX < button.x+button.w &&
-			cursorY > button.y &&
-			cursorY < button.y+button.h {
-			ui.SelectedAction = button.action
-			if button.action == "start" {
-				ui.changeView()
-			}
-		}
-	}
 }
 
 func (ui *UI) ActionUpdate(t *timer.Timer) error {

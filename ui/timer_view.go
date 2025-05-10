@@ -11,51 +11,50 @@ import (
 )
 
 const (
-	dotoPy       = 6
-	dotoLx       = 16
-	sessionX     = 175
-	streamLabelX = 300
-	streamTimeX  = 480
+	fontX float64 = 16
+	row1y float64 = 0
+	row2y float64 = 27
 )
 
 func (ui *UI) RenderTimerView(screen *ebiten.Image, t *timer.Timer) {
 	textFace := &text.GoTextFace{
-		Source: dotoSource,
-		Size:   35,
+		Source: silkscreenSource,
+		Size:   24.21875,
 	}
-	renderSessionTime(screen, textFace, t)
-	renderStreamTime(screen, textFace, t)
+	renderTime(screen, textFace, t)
 }
 
-func renderSessionTime(screen *ebiten.Image, textFace *text.GoTextFace, t *timer.Timer) {
+func renderTime(screen *ebiten.Image, textFace *text.GoTextFace, t *timer.Timer) {
 	op := &text.DrawOptions{}
-	op.GeoM.Translate(dotoLx, dotoPy)
-	op.ColorScale.ScaleWithColor(color.White)
-	label := setSessionLabel(t.Activity)
+	op.GeoM.Translate(fontX, row1y)
+	op.ColorScale.ScaleWithColor(TextColor)
+	label := setSessionLabel(t.Activity, t.SessionNumber)
 	text.Draw(screen, label, textFace, op)
+	w, _ := text.Measure(label, textFace, 0)
 
 	op = &text.DrawOptions{}
-	op.GeoM.Translate(sessionX, dotoPy)
 	timeInt := t.Count / timer.Tick
 	timeColor := setTimeColor(timeInt)
 	op.ColorScale.ScaleWithColor(timeColor)
 	time := formatTime(timeInt)
+	w, _ = text.Measure(time, textFace, 0)
+	op.GeoM.Translate(TimerWidth-w-fontX, row1y)
 	text.Draw(screen, time, textFace, op)
-}
-
-func renderStreamTime(screen *ebiten.Image, textFace *text.GoTextFace, t *timer.Timer) {
-	op := &text.DrawOptions{}
-	op.GeoM.Translate(streamLabelX, dotoPy)
-	op.ColorScale.ScaleWithColor(color.White)
-	label := "| Stream"
-	text.Draw(screen, label, textFace, op)
 
 	op = &text.DrawOptions{}
-	op.GeoM.Translate(streamTimeX, dotoPy)
-	timeInt := t.TotalCount / timer.Tick
-	timeColor := setTimeColor(timeInt)
+	op.GeoM.Translate(fontX, row2y)
+	op.ColorScale.ScaleWithColor(TextColor)
+	label = "Stream time "
+	text.Draw(screen, label, textFace, op)
+	w, _ = text.Measure(label, textFace, 0)
+
+	op = &text.DrawOptions{}
+	timeInt = t.TotalCount / timer.Tick
+	timeColor = setTimeColor(timeInt)
 	op.ColorScale.ScaleWithColor(timeColor)
 	timeString := getTimeString(timeInt)
+	w, _ = text.Measure(timeString, textFace, 0)
+	op.GeoM.Translate(TimerWidth-w-fontX, row2y)
 	text.Draw(screen, timeString, textFace, op)
 }
 
@@ -67,16 +66,20 @@ func getTimeString(timeInt int) (timeString string) {
 	}
 }
 
-func setSessionLabel(activity timer.ActivityState) string {
+func setSessionLabel(activity timer.ActivityState, session int) string {
 	switch activity {
 	case timer.StartingInState:
-		return "Start"
+		return "Starting in "
 	case timer.FocusState:
-		return "Focus"
+		if session > 1 {
+			return fmt.Sprintf("Focus time %d", session)
+		} else {
+			return "Last session "
+		}
 	case timer.BreakState:
-		return "Break"
+		return "Break time "
 	case timer.TimeoutState:
-		return "Timeout"
+		return "Timeout "
 	}
 	return ""
 }

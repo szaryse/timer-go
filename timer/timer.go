@@ -45,9 +45,11 @@ func NewTimer() (timer Timer) {
 
 func (t *Timer) Update() error {
 	if t.IsRunning {
+		if t.Count == 0 {
+			t.changeTimerState()
+		}
 		t.Count -= 1
 		t.TotalCount -= 1
-		// todo logic
 	}
 	return nil
 }
@@ -72,10 +74,31 @@ func (t *Timer) HandleAction(action string) {
 		t.BreakTime = setTime(t.BreakTime - 60)
 	case "start":
 		t.IsRunning = true
-		t.Count = startInTime * Tick
+		t.Count = t.StartInTime * Tick
 		t.TotalCount = t.StreamTime * Tick
 	}
 	t.calcStreamTime()
+}
+
+func (t *Timer) changeTimerState() {
+	switch t.Activity {
+	case StartingInState:
+		t.Activity = FocusState
+		t.Count = focusTime * Tick
+	case FocusState:
+		t.Activity = BreakState
+		t.Count = breakTime * Tick
+	case BreakState:
+		if t.SessionNumber > 0 {
+			t.Activity = FocusState
+			t.Count = focusTime * Tick
+			t.SessionNumber -= 1
+		} else {
+			t.Activity = TimeoutState
+		}
+	case TimeoutState:
+		return
+	}
 }
 
 func (t *Timer) calcStreamTime() {

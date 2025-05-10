@@ -24,16 +24,16 @@ func init() {
 	firaCodeSource = fcs
 }
 
-//go:embed ..\assets\fonts\DotoRegular.ttf
-var DotoRegular []byte
-var dotoSource *text.GoTextFaceSource
+//go:embed ..\assets\fonts\SilkscreenRegular.ttf
+var SilkscreenRegular []byte
+var silkscreenSource *text.GoTextFaceSource
 
 func init() {
-	ds, err := text.NewGoTextFaceSource(bytes.NewReader(DotoRegular))
+	ds, err := text.NewGoTextFaceSource(bytes.NewReader(SilkscreenRegular))
 	if err != nil {
 		log.Fatal(err)
 	}
-	dotoSource = ds
+	silkscreenSource = ds
 }
 
 type ViewState int
@@ -46,7 +46,7 @@ const (
 const (
 	SettingsWidth  = 440
 	SettingsHeight = 220
-	TimerWidth     = 640
+	TimerWidth     = 360
 	BgPadding      = 4
 	TimerHeight    = 54 + 2*BgPadding
 	leftX          = 10 // left padding x (inside background)
@@ -64,14 +64,16 @@ type UI struct {
 	CurrentView     ViewState
 	WindowPositionX int
 	WindowPositionY int
-	SettingsButtons [12]Button
+	SettingsButtons ButtonsArray
 	SelectedAction  string
+	beforeStart     bool
 }
 
 func CreateUI() UI {
 	return UI{
 		CurrentView:     SettingsView,
 		SettingsButtons: createSettingsButtons(),
+		beforeStart:     true,
 	}
 }
 
@@ -104,6 +106,9 @@ func (ui *UI) ActionUpdate(t *timer.Timer) error {
 			return ebiten.Termination
 		}
 		t.HandleAction(action)
+		if action == "start" {
+			ui.beforeStart = false
+		}
 		ui.SelectedAction = ""
 	}
 	return nil

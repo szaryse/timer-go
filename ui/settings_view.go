@@ -29,9 +29,13 @@ func (ui *UI) RenderSettingView(screen *ebiten.Image, timer *timer.Timer) {
 	ui.renderRow(screen, 1, "Session number", timer.SessionNumber)
 	ui.renderRow(screen, 2, "Focus time", timer.FocusTime)
 	ui.renderRow(screen, 3, "Break time", timer.BreakTime)
-	ui.renderRow(screen, 4, "Stream time", timer.StreamTime)
+	ui.renderRowWithoutButtons(screen, 4, "Stream time", timer.StreamTime)
 	ui.drawButton(screen, 8)
-	ui.drawButton(screen, 9)
+	if ui.beforeStart {
+		ui.drawButton(screen, 9)
+	} else {
+		ui.drawButton(screen, 10)
+	}
 }
 
 func (ui *UI) renderRow(screen *ebiten.Image, rowIndex int, label string, value int) {
@@ -43,6 +47,13 @@ func (ui *UI) renderRow(screen *ebiten.Image, rowIndex int, label string, value 
 	ui.drawButton(screen, 2*rowIndex+1)
 }
 
+func (ui *UI) renderRowWithoutButtons(screen *ebiten.Image, rowIndex int, label string, value int) {
+	rowY := float64(calcRowY(rowIndex))
+	renderText(screen, leftX, rowY, label)
+	valueStr := formatValue(value, label)
+	renderCenteredText(screen, vx, rowY, valueWidth, valueStr)
+}
+
 func (ui *UI) handleClickOnSettings() {
 	cursorX, cursorY := ebiten.CursorPosition()
 	for _, button := range ui.SettingsButtons {
@@ -50,9 +61,20 @@ func (ui *UI) handleClickOnSettings() {
 			cursorX < button.x+button.w &&
 			cursorY > button.y &&
 			cursorY < button.y+button.h {
-			ui.SelectedAction = button.action
-			if button.action == "start" {
-				ui.changeView()
+
+			switch button.action {
+			case "start":
+				if ui.beforeStart {
+					fmt.Println("Click", button.action)
+					ui.SelectedAction = button.action
+					ui.changeView()
+				}
+			case "changeView":
+				if ui.beforeStart == false {
+					ui.changeView()
+				}
+			default:
+				ui.SelectedAction = button.action
 			}
 		}
 	}

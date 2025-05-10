@@ -14,6 +14,8 @@ type Button struct {
 	color      color.Color
 }
 
+type ButtonsArray [11]Button
+
 func createButton(x int, label, action string) Button {
 	return Button{
 		x,
@@ -26,8 +28,8 @@ func createButton(x int, label, action string) Button {
 	}
 }
 
-func createSettingsButtons() [12]Button {
-	var buttons [12]Button
+func createSettingsButtons() ButtonsArray {
+	var buttons ButtonsArray
 	buttons[0] = createButton(btnLx, "+", "increaseStart")
 	buttons[1] = createButton(btnRx, "-", "decreaseStart")
 	buttons[2] = createButton(btnLx, "+", "increaseSession")
@@ -38,15 +40,18 @@ func createSettingsButtons() [12]Button {
 	buttons[7] = createButton(btnRx, "-", "decreaseBreak")
 	buttons[8] = createButton(70, "Exit", "exit")
 	buttons[9] = createButton(260, "Start", "start")
+	buttons[10] = createButton(260, "Timer", "changeView")
 
 	for idx := range buttons {
 		buttons[idx].w = buttonWidth
 		buttons[idx].y = calcRowY(idx / 2)
 	}
-	buttons[8].w = textBtnWidth
-	buttons[8].y = actionBtnY
-	buttons[9].w = textBtnWidth
-	buttons[9].y = actionBtnY
+
+	actionButtons := buttons[8:]
+	for idx := range actionButtons {
+		actionButtons[idx].w = textBtnWidth
+		actionButtons[idx].y = actionBtnY
+	}
 
 	return buttons
 }

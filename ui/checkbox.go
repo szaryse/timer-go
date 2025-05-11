@@ -3,11 +3,13 @@ package ui
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"image/color"
 )
 
 type Checkbox struct {
 	box       uiRect
 	isChecked bool
+	color     color.RGBA
 }
 
 type CheckboxArray [1]Checkbox
@@ -20,6 +22,7 @@ func createCheckbox() (checkboxes CheckboxArray) {
 			buttonHeight,
 		},
 		isChecked: false,
+		color:     PrimaryColor,
 	}
 	return
 }
@@ -28,7 +31,7 @@ func (ui *UI) drawCheckbox(screen *ebiten.Image) {
 	cb := ui.Checkboxes[0]
 	if cb.isChecked {
 		vector.DrawFilledRect(screen, float32(cb.box.x), float32(cb.box.y+btnMy),
-			float32(cb.box.w), float32(cb.box.h), PrimaryColor, true)
+			float32(cb.box.w), float32(cb.box.h), cb.color, true)
 		vector.StrokeLine(screen, float32(cb.box.x+4), float32(cb.box.y+(cb.box.h/2)+btnMy),
 			float32(cb.box.x+(cb.box.w/2)), float32(cb.box.y+cb.box.h),
 			3, TextColor, true)
@@ -36,7 +39,8 @@ func (ui *UI) drawCheckbox(screen *ebiten.Image) {
 			float32(cb.box.x+cb.box.w-4), float32(cb.box.y+btnMy+4),
 			3, TextColor, true)
 	} else {
-		vector.StrokeRect(screen, float32(cb.box.x+(strokeWidth/2)), float32(cb.box.y+btnMy+(strokeWidth/2)),
-			float32(cb.box.w-(strokeWidth/2)), float32(cb.box.h-(strokeWidth/2)), strokeWidth, PrimaryColor, true)
+		vector.StrokeRect(screen, float32(cb.box.x+(strokeWidth/2)),
+			float32(cb.box.y+btnMy+(strokeWidth/2)), float32(cb.box.w-(strokeWidth/2)),
+			float32(cb.box.h-(strokeWidth/2)), strokeWidth, cb.color, true)
 	}
 }

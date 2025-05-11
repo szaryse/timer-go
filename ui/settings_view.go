@@ -63,13 +63,13 @@ func (ui *UI) renderRowWithCheckbox(screen *ebiten.Image, rowIndex int, label st
 
 func (ui *UI) handleClickOnSettings() {
 	cursorX, cursorY := ebiten.CursorPosition()
-	for _, button := range ui.SettingsButtons {
-		if checkIsButtonClicked(cursorX, cursorY, &button.box) {
-			ui.selectAction(&button)
+	for idx := range ui.SettingsButtons {
+		if checkIsElementSelected(cursorX, cursorY, &ui.SettingsButtons[idx].box) {
+			ui.selectAction(&ui.SettingsButtons[idx])
 		}
 	}
 	for idx := range ui.Checkboxes {
-		if checkIsButtonClicked(cursorX, cursorY, &ui.Checkboxes[idx].box) {
+		if checkIsElementSelected(cursorX, cursorY, &ui.Checkboxes[idx].box) {
 			ui.isStreamOnly = !ui.isStreamOnly
 			ui.Checkboxes[idx].isChecked = ui.isStreamOnly
 		}
@@ -92,11 +92,61 @@ func (ui *UI) selectAction(button *Button) {
 	}
 }
 
-func checkIsButtonClicked(cursorX, cursorY int, box *uiRect) bool {
+func checkIsElementSelected(cursorX, cursorY int, box *uiRect) bool {
 	return cursorX > box.x &&
 		cursorX < box.x+box.w &&
 		cursorY > box.y &&
 		cursorY < box.y+box.h
+}
+
+func (ui *UI) hoverElement() {
+	cursorX, cursorY := ebiten.CursorPosition()
+	buttonIdx := -1
+	checkboxIdx := -1
+	for idx := range ui.SettingsButtons {
+		if checkIsElementSelected(cursorX, cursorY, &ui.SettingsButtons[idx].box) {
+			if ui.SettingsButtons[idx].color == PrimaryColor {
+				ui.SettingsButtons[idx].color = SelectedColor
+			}
+			if ui.beforeStart &&
+				(ui.SettingsButtons[idx].label == "Start" ||
+					ui.SettingsButtons[idx].label == "Timer") {
+				buttonIdx = 9
+			} else if !ui.beforeStart &&
+				(ui.SettingsButtons[idx].label == "Start" ||
+					ui.SettingsButtons[idx].label == "Timer") {
+				buttonIdx = 10
+			} else {
+				buttonIdx = idx
+			}
+		}
+	}
+	ui.clearHoverOnButtons(buttonIdx)
+	for idx := range ui.Checkboxes {
+		if checkIsElementSelected(cursorX, cursorY, &ui.Checkboxes[idx].box) {
+			if ui.Checkboxes[idx].color == PrimaryColor {
+				ui.Checkboxes[idx].color = SelectedColor
+			}
+			checkboxIdx = idx
+		}
+	}
+	ui.clearHoverOnCheckbox(checkboxIdx)
+}
+
+func (ui *UI) clearHoverOnButtons(selectedIdx int) {
+	for idx := range ui.SettingsButtons {
+		if selectedIdx != idx && ui.SettingsButtons[idx].color == SelectedColor {
+			ui.SettingsButtons[idx].color = PrimaryColor
+		}
+	}
+}
+
+func (ui *UI) clearHoverOnCheckbox(selectedIdx int) {
+	for idx := range ui.Checkboxes {
+		if selectedIdx != idx && ui.Checkboxes[idx].color == SelectedColor {
+			ui.Checkboxes[idx].color = PrimaryColor
+		}
+	}
 }
 
 func renderText(screen *ebiten.Image, x, y float64, label string) {

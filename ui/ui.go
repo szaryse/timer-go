@@ -53,11 +53,12 @@ const (
 )
 
 var (
-	TextColor    = color.Gray{Y: 192}
-	PrimaryColor = color.RGBA{R: 0x00, G: 0x80, B: 0x00, A: 0xff}
-	CyanColor    = color.RGBA{R: 0x00, G: 0xff, B: 0xff, A: 0xff}
-	RedColor     = color.RGBA{R: 0xff, G: 0x00, B: 0x00, A: 0xff}
-	bgColor      = color.RGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xc0}
+	TextColor     = color.Gray{Y: 192}
+	PrimaryColor  = color.RGBA{R: 0x00, G: 0x80, B: 0x00, A: 0xff}
+	SelectedColor = color.RGBA{R: 0x00, G: 0xe0, B: 0x00, A: 0xff}
+	CyanColor     = color.RGBA{R: 0x00, G: 0xff, B: 0xff, A: 0xff}
+	RedColor      = color.RGBA{R: 0xff, G: 0x00, B: 0x00, A: 0xff}
+	bgColor       = color.RGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xc0}
 )
 
 type UI struct {
@@ -98,6 +99,9 @@ func (ui *UI) Update() error {
 		if ui.CurrentView == SettingsView {
 			ui.handleClickOnSettings()
 		}
+	}
+	if ui.CurrentView == SettingsView {
+		ui.hoverElement()
 	}
 	return nil
 }

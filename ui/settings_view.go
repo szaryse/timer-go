@@ -16,7 +16,7 @@ const (
 	py           = 4   // padding y
 	my           = 4   // margin y
 	btnMy        = 4   // button margin y
-	actionBtnY   = 175
+	actionBtnY   = 205
 	valueWidth   = 120
 	buttonHeight = 22 // fontSize + my*2 - 2*btnM
 	buttonWidth  = 24 // default button width
@@ -30,6 +30,7 @@ func (ui *UI) RenderSettingView(screen *ebiten.Image, timer *timer.Timer) {
 	ui.renderRow(screen, 2, "Focus time", timer.FocusTime)
 	ui.renderRow(screen, 3, "Break time", timer.BreakTime)
 	ui.renderRowWithoutButtons(screen, 4, "Stream time", timer.StreamTime)
+	ui.renderRowWithCheckbox(screen, 5, "Stream time only")
 	ui.drawButton(screen, 8)
 	if ui.beforeStart {
 		ui.drawButton(screen, 9)
@@ -54,30 +55,48 @@ func (ui *UI) renderRowWithoutButtons(screen *ebiten.Image, rowIndex int, label 
 	renderCenteredText(screen, vx, rowY, valueWidth, valueStr)
 }
 
+func (ui *UI) renderRowWithCheckbox(screen *ebiten.Image, rowIndex int, label string) {
+	rowY := float64(calcRowY(rowIndex))
+	renderText(screen, leftX, rowY, label)
+	ui.drawCheckbox(screen)
+}
+
 func (ui *UI) handleClickOnSettings() {
 	cursorX, cursorY := ebiten.CursorPosition()
 	for _, button := range ui.SettingsButtons {
-		if cursorX > button.x &&
-			cursorX < button.x+button.w &&
-			cursorY > button.y &&
-			cursorY < button.y+button.h {
-
-			switch button.action {
-			case "start":
-				if ui.beforeStart {
-					fmt.Println("Click", button.action)
-					ui.SelectedAction = button.action
-					ui.changeView()
-				}
-			case "changeView":
-				if ui.beforeStart == false {
-					ui.changeView()
-				}
-			default:
-				ui.SelectedAction = button.action
-			}
+		if checkIsButtonClicked(cursorX, cursorY, &button.box) {
+			ui.selectAction(&button)
 		}
 	}
+	for idx := range ui.Checkboxes {
+		if checkIsButtonClicked(cursorX, cursorY, &ui.Checkboxes[idx].box) {
+			ui.isStreamOnly = !ui.isStreamOnly
+			ui.Checkboxes[idx].isChecked = ui.isStreamOnly
+		}
+	}
+}
+
+func (ui *UI) selectAction(button *Button) {
+	switch button.action {
+	case "start":
+		if ui.beforeStart {
+			ui.SelectedAction = button.action
+			ui.changeView()
+		}
+	case "changeView":
+		if ui.beforeStart == false {
+			ui.changeView()
+		}
+	default:
+		ui.SelectedAction = button.action
+	}
+}
+
+func checkIsButtonClicked(cursorX, cursorY int, box *uiRect) bool {
+	return cursorX > box.x &&
+		cursorX < box.x+box.w &&
+		cursorY > box.y &&
+		cursorY < box.y+box.h
 }
 
 func renderText(screen *ebiten.Image, x, y float64, label string) {

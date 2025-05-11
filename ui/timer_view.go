@@ -21,41 +21,37 @@ func (ui *UI) RenderTimerView(screen *ebiten.Image, t *timer.Timer) {
 		Source: silkscreenSource,
 		Size:   24.21875,
 	}
-	renderTime(screen, textFace, t)
+	if ui.isStreamOnly == false {
+		renderLabel(screen, textFace, t, "", row1y)
+		renderTimeValue(screen, textFace, t.Count, row1y, formatTime)
+	}
+	y := row2y
+	if ui.isStreamOnly {
+		y = row2y / 2
+	}
+	renderLabel(screen, textFace, t, "Stream time ", y)
+	renderTimeValue(screen, textFace, t.TotalCount, y, getTimeString)
 }
 
-func renderTime(screen *ebiten.Image, textFace *text.GoTextFace, t *timer.Timer) {
+func renderLabel(screen *ebiten.Image, textFace *text.GoTextFace, t *timer.Timer, label string, y float64) {
 	op := &text.DrawOptions{}
-	op.GeoM.Translate(fontX, row1y)
+	op.GeoM.Translate(fontX, y)
 	op.ColorScale.ScaleWithColor(TextColor)
-	label := setSessionLabel(t.Activity, t.SessionNumber)
+	if len(label) == 0 {
+		label = setSessionLabel(t.Activity, t.SessionNumber)
+	}
 	text.Draw(screen, label, textFace, op)
-	w, _ := text.Measure(label, textFace, 0)
+}
 
-	op = &text.DrawOptions{}
-	timeInt := t.Count / timer.Tick
+func renderTimeValue(screen *ebiten.Image, textFace *text.GoTextFace, value int, y float64, formatFn func(int) string) {
+	op := &text.DrawOptions{}
+	timeInt := value / timer.Tick
 	timeColor := setTimeColor(timeInt)
 	op.ColorScale.ScaleWithColor(timeColor)
-	time := formatTime(timeInt)
-	w, _ = text.Measure(time, textFace, 0)
-	op.GeoM.Translate(TimerWidth-w-fontX, row1y)
+	time := formatFn(timeInt)
+	w, _ := text.Measure(time, textFace, 0)
+	op.GeoM.Translate(TimerWidth-w-fontX, y)
 	text.Draw(screen, time, textFace, op)
-
-	op = &text.DrawOptions{}
-	op.GeoM.Translate(fontX, row2y)
-	op.ColorScale.ScaleWithColor(TextColor)
-	label = "Stream time "
-	text.Draw(screen, label, textFace, op)
-	w, _ = text.Measure(label, textFace, 0)
-
-	op = &text.DrawOptions{}
-	timeInt = t.TotalCount / timer.Tick
-	timeColor = setTimeColor(timeInt)
-	op.ColorScale.ScaleWithColor(timeColor)
-	timeString := getTimeString(timeInt)
-	w, _ = text.Measure(timeString, textFace, 0)
-	op.GeoM.Translate(TimerWidth-w-fontX, row2y)
-	text.Draw(screen, timeString, textFace, op)
 }
 
 func getTimeString(timeInt int) (timeString string) {

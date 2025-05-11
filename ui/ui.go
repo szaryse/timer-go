@@ -45,7 +45,7 @@ const (
 
 const (
 	SettingsWidth  = 440
-	SettingsHeight = 220
+	SettingsHeight = 250
 	TimerWidth     = 360
 	BgPadding      = 4
 	TimerHeight    = 54 + 2*BgPadding
@@ -67,6 +67,8 @@ type UI struct {
 	SettingsButtons ButtonsArray
 	SelectedAction  string
 	beforeStart     bool
+	Checkboxes      CheckboxArray
+	isStreamOnly    bool
 }
 
 func CreateUI() UI {
@@ -74,6 +76,7 @@ func CreateUI() UI {
 		CurrentView:     SettingsView,
 		SettingsButtons: createSettingsButtons(),
 		beforeStart:     true,
+		Checkboxes:      createCheckbox(),
 	}
 }
 

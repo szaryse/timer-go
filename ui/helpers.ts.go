@@ -29,3 +29,7 @@ func formatFullTime(time int) string {
 	secondsStr := fmt.Sprintf("%02d", seconds)
 	return fmt.Sprintf("%s:%s:%s", hoursStr, minutesStr, secondsStr)
 }
+
+type uiRect struct {
+	x, y, w, h int
+}

@@ -8,20 +8,20 @@ import (
 )
 
 type Button struct {
-	x, y, w, h int
-	label      string
-	action     string
-	color      color.Color
+	box    uiRect
+	label  string
+	action string
+	color  color.Color
 }
 
 type ButtonsArray [11]Button
 
 func createButton(x int, label, action string) Button {
 	return Button{
-		x,
-		0,
-		0,
-		buttonHeight,
+		uiRect{x,
+			0,
+			0,
+			buttonHeight},
 		label,
 		action,
 		PrimaryColor,
@@ -43,14 +43,14 @@ func createSettingsButtons() ButtonsArray {
 	buttons[10] = createButton(260, "Timer", "changeView")
 
 	for idx := range buttons {
-		buttons[idx].w = buttonWidth
-		buttons[idx].y = calcRowY(idx / 2)
+		buttons[idx].box.w = buttonWidth
+		buttons[idx].box.y = calcRowY(idx / 2)
 	}
 
 	actionButtons := buttons[8:]
 	for idx := range actionButtons {
-		actionButtons[idx].w = textBtnWidth
-		actionButtons[idx].y = actionBtnY
+		actionButtons[idx].box.w = textBtnWidth
+		actionButtons[idx].box.y = actionBtnY
 	}
 
 	return buttons
@@ -58,8 +58,10 @@ func createSettingsButtons() ButtonsArray {
 
 func (ui *UI) drawButton(screen *ebiten.Image, idx int) {
 	btn := ui.SettingsButtons[idx]
-	vector.StrokeRect(screen, float32(btn.x), float32(btn.y+btnMy), float32(btn.w), float32(btn.h), strokeWidth, btn.color, true)
-	renderButtonText(screen, float64(btn.x), float64(btn.y), float64(btn.w), btn.label)
+	vector.StrokeRect(screen, float32(btn.box.x), float32(btn.box.y+btnMy),
+		float32(btn.box.w), float32(btn.box.h), strokeWidth, btn.color, true)
+	renderButtonText(screen, float64(btn.box.x), float64(btn.box.y),
+		float64(btn.box.w), btn.label)
 }
 
 func renderButtonText(screen *ebiten.Image, x, y, w float64, label string) {

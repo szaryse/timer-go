@@ -1,6 +1,15 @@
 package ui
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/hajimehoshi/ebiten/v2/vector"
+	"math"
+)
+
+const (
+	uiRadius = 8
+	py       = 4 // padding y
+)
 
 func calcRowY(idx int) int {
 	return py + (idx*fontSize + (idx * my * 2))
@@ -32,4 +41,33 @@ func formatFullTime(time int) string {
 
 type uiRect struct {
 	x, y, w, h int
+}
+
+func createRoundedPath(w, h float32) (path vector.Path) {
+	r := float32(uiRadius)
+	bm := float32(btnMy)
+	ds := float32(strokeWidth / 2)
+	a90 := float32((90 * math.Pi) / 180)
+	a180 := float32((180 * math.Pi) / 180)
+	a270 := float32((270 * math.Pi) / 180)
+	a360 := float32((360 * math.Pi) / 180)
+
+	// top left corner + top line
+	path.Arc(r+ds, r+bm+ds, r, a180, a270, 0)
+	path.MoveTo(r+ds, bm+ds)
+	path.LineTo(w-r-ds, bm+ds)
+	// top right corner + right line
+	path.Arc(w-r-ds, bm+r+ds, r, a270, a360, 0)
+	path.MoveTo(w-ds, bm+r+ds)
+	path.LineTo(w-ds, bm+h-r-ds)
+	// bottom right corner + bottom line
+	path.Arc(w-r-ds, bm+h-r-ds, r, 0, a90, 0)
+	path.MoveTo(w-r-ds, bm+h-ds)
+	path.LineTo(r+ds, bm+h-ds)
+	// bottom left corner + left line
+	path.Arc(r+ds, bm+h-r-ds, r, a90, a180, 0)
+	path.MoveTo(ds, bm+h-r-ds)
+	path.LineTo(ds, r+bm+ds)
+	path.Close()
+	return
 }

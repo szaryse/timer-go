@@ -70,6 +70,8 @@ type UI struct {
 	beforeStart     bool
 	Checkboxes      CheckboxArray
 	isStreamOnly    bool
+	vertices        []ebiten.Vertex
+	indices         []uint16
 }
 
 func CreateUI() UI {

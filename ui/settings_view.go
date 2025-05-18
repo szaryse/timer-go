@@ -8,19 +8,13 @@ import (
 )
 
 const (
-	fontSize     = 24 // line height (31.5) = 24 + (2*4)
-	btnFontSize  = 18
-	btnLx        = 232 // button left x
+	fontSize     = 24  // line height (31.5) = 24 + (2*4)
 	vx           = 270 // value x
-	btnRx        = 400 // button right x
-	py           = 4   // padding y
 	my           = 4   // margin y
-	btnMy        = 4   // button margin y
-	actionBtnY   = 205
+	btnMy        = 3   // button margin y
 	valueWidth   = 120
-	buttonHeight = 22 // fontSize + my*2 - 2*btnM
-	buttonWidth  = 24 // default button width
-	textBtnWidth = 100
+	buttonHeight = 24
+	buttonWidth  = 30 // default button width
 	strokeWidth  = 2
 )
 
@@ -95,8 +89,8 @@ func (ui *UI) selectAction(button *Button) {
 func checkIsElementSelected(cursorX, cursorY int, box *uiRect) bool {
 	return cursorX > box.x &&
 		cursorX < box.x+box.w &&
-		cursorY > box.y &&
-		cursorY < box.y+box.h
+		cursorY > box.y+btnMy &&
+		cursorY < box.y+box.h+btnMy
 }
 
 func (ui *UI) hoverElement() {

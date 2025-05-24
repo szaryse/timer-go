@@ -81,18 +81,27 @@ func setSessionLabel(activity timer.ActivityState, session int) string {
 }
 
 func setTimeColor(time int) color.RGBA {
-	if time <= 30 {
-		return RedColor
+	var r, g, b uint8
+	var err error
+
+	switch true {
+	case time <= 20:
+		r, g, b, err = HSLToRGB(0, 1, 0.5) // red
+	case time <= 200:
+		r, g, b, err = HSLToRGB(float64(time-20), 1, 0.5) // from cyan to red
+	case time <= 250:
+		s := (250 - float64(time)) / 50
+		r, g, b, err = HSLToRGB(180, s, 0.5) // from grey to cyan
+	default:
+		r, g, b, err = HSLToRGB(180, 0, 0.5) // grey
 	}
-	if time <= 210 {
-		r, g, b, err := HSLToRGB(float64(time-30), 1, 0.5)
-		if err != nil {
-			fmt.Println(err)
-			return CyanColor
-		}
-		return color.RGBA{R: r, G: g, B: b, A: 0xff}
+
+	if err != nil {
+		fmt.Println(err)
+		r, g, b, err = HSLToRGB(180, 0, 0.5)
 	}
-	return CyanColor
+
+	return color.RGBA{R: r, G: g, B: b, A: 0xff}
 }
 
 // HSLToRGB function from package colorconv.
@@ -102,7 +111,8 @@ func HSLToRGB(h, s, l float64) (r, g, b uint8, err error) {
 	if h < 0 || h >= 360 ||
 		s < 0 || s > 1 ||
 		l < 0 || l > 1 {
-		return 0, 0, 0, errors.New("HSLToRGB: inputs out of range")
+		errMessage := fmt.Sprintf("HSLToRGB: Invalid H/S/L values %f / %f / %f", h, s, l)
+		return 0, 0, 0, errors.New(errMessage)
 	}
 	// When 0 ≤ h < 360, 0 ≤ s ≤ 1 and 0 ≤ l ≤ 1:
 	C := (1 - math.Abs((2*l)-1)) * s

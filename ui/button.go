@@ -3,19 +3,8 @@ package ui
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
-	"image"
 	"image/color"
 )
-
-var (
-	whiteImage    = ebiten.NewImage(3, 3)
-	whiteSubImage = whiteImage.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image)
-)
-
-func init() {
-	whiteImage.Fill(color.White)
-}
 
 const (
 	textBtnWidth = 100
@@ -77,26 +66,10 @@ func createSettingsButtons() ButtonsArray {
 func (ui *UI) drawButton(screen *ebiten.Image, idx int) {
 	btn := ui.SettingsButtons[idx]
 	path := createRoundedPath(float32(btn.box.w), float32(btn.box.h))
-
-	ops := &vector.StrokeOptions{}
-	ops.Width = strokeWidth
-	ops.LineJoin = vector.LineJoinMiter
+	ops := createStrokeOptions()
 	ui.vertices, ui.indices = path.AppendVerticesAndIndicesForStroke(ui.vertices[:0], ui.indices[:0], ops)
-
-	red, g, b, a := btn.color.RGBA()
-	for i := range ui.vertices {
-		ui.vertices[i].DstX = ui.vertices[i].DstX + float32(btn.box.x)
-		ui.vertices[i].DstY = ui.vertices[i].DstY + float32(btn.box.y)
-		ui.vertices[i].SrcX = 1
-		ui.vertices[i].SrcY = 1
-		ui.vertices[i].ColorR = float32(red) / float32(0xffff)
-		ui.vertices[i].ColorG = float32(g) / float32(0xffff)
-		ui.vertices[i].ColorB = float32(b) / float32(0xffff)
-		ui.vertices[i].ColorA = float32(a) / float32(0xffff)
-	}
-
-	op := &ebiten.DrawTrianglesOptions{}
-	op.FillRule = ebiten.FillRuleNonZero
+	ui.setVertices(btn.color, btn.box.x, btn.box.y)
+	op := createTrianglesOptions()
 	screen.DrawTriangles(ui.vertices, ui.indices, whiteSubImage, op)
 
 	renderButtonText(screen, float64(btn.box.x), float64(btn.box.y),

@@ -5,7 +5,18 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/szaryse/timer-go255/timer"
+	"image"
+	"image/color"
 )
+
+var (
+	whiteImage    = ebiten.NewImage(3, 3)
+	whiteSubImage = whiteImage.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image)
+)
+
+func init() {
+	whiteImage.Fill(color.White)
+}
 
 const (
 	fontSize     = 24  // line height (31.5) = 24 + (2*4)
@@ -86,13 +97,6 @@ func (ui *UI) selectAction(button *Button) {
 	}
 }
 
-func checkIsElementSelected(cursorX, cursorY int, box *uiRect) bool {
-	return cursorX > box.x &&
-		cursorX < box.x+box.w &&
-		cursorY > box.y+btnMy &&
-		cursorY < box.y+box.h+btnMy
-}
-
 func (ui *UI) hoverElement() {
 	cursorX, cursorY := ebiten.CursorPosition()
 	buttonIdx := -1
@@ -141,6 +145,27 @@ func (ui *UI) clearHoverOnCheckbox(selectedIdx int) {
 			ui.Checkboxes[idx].color = PrimaryColor
 		}
 	}
+}
+
+func (ui *UI) setVertices(color color.Color, x, y int) {
+	red, g, b, a := color.RGBA()
+	for i := range ui.vertices {
+		ui.vertices[i].DstX = ui.vertices[i].DstX + float32(x)
+		ui.vertices[i].DstY = ui.vertices[i].DstY + float32(y)
+		ui.vertices[i].SrcX = 1
+		ui.vertices[i].SrcY = 1
+		ui.vertices[i].ColorR = float32(red) / float32(0xffff)
+		ui.vertices[i].ColorG = float32(g) / float32(0xffff)
+		ui.vertices[i].ColorB = float32(b) / float32(0xffff)
+		ui.vertices[i].ColorA = float32(a) / float32(0xffff)
+	}
+}
+
+func checkIsElementSelected(cursorX, cursorY int, box *uiRect) bool {
+	return cursorX > box.x &&
+		cursorX < box.x+box.w &&
+		cursorY > box.y+btnMy &&
+		cursorY < box.y+box.h+btnMy
 }
 
 func renderText(screen *ebiten.Image, x, y float64, label string) {

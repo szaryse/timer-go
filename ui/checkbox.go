@@ -30,17 +30,50 @@ func createCheckbox() (checkboxes CheckboxArray) {
 func (ui *UI) drawCheckbox(screen *ebiten.Image) {
 	cb := ui.Checkboxes[0]
 	if cb.isChecked {
-		vector.DrawFilledRect(screen, float32(cb.box.x), float32(cb.box.y+btnMy),
-			float32(cb.box.w), float32(cb.box.h), cb.color, true)
-		vector.StrokeLine(screen, float32(cb.box.x+4), float32(cb.box.y+(cb.box.h/2)+btnMy),
-			float32(cb.box.x+(cb.box.w/2)), float32(cb.box.y+cb.box.h),
-			3, TextColor, true)
-		vector.StrokeLine(screen, float32(cb.box.x+(cb.box.w/2)), float32(cb.box.y+cb.box.h),
-			float32(cb.box.x+cb.box.w-4), float32(cb.box.y+btnMy+4),
-			3, TextColor, true)
+		ui.drawFilledBackground(screen, &cb)
+		ui.drawCheckboxLines(screen, &cb)
 	} else {
-		vector.StrokeRect(screen, float32(cb.box.x+(strokeWidth/2)),
-			float32(cb.box.y+btnMy+(strokeWidth/2)), float32(cb.box.w-(strokeWidth/2)),
-			float32(cb.box.h-(strokeWidth/2)), strokeWidth, cb.color, true)
+		ui.drawUncheckedCheckbox(screen, &cb)
 	}
+}
+
+func (ui *UI) drawFilledBackground(screen *ebiten.Image, cb *Checkbox) {
+	path := createRoundedPath(float32(cb.box.w), float32(cb.box.h))
+	ui.vertices, ui.indices = path.AppendVerticesAndIndicesForFilling(ui.vertices[:0], ui.indices[:0])
+	ui.setVertices(cb.color, cb.box.x, cb.box.y)
+	op := createTrianglesOptions()
+	screen.DrawTriangles(ui.vertices, ui.indices, whiteSubImage, op)
+}
+
+func (ui *UI) drawCheckboxLines(screen *ebiten.Image, cb *Checkbox) {
+	path := createPath()
+	ops := createCheckboxStrokeOptions()
+	ui.vertices, ui.indices = path.AppendVerticesAndIndicesForStroke(ui.vertices[:0], ui.indices[:0], ops)
+	ui.setVertices(color.Black, cb.box.x, cb.box.y)
+	op := createTrianglesOptions()
+	screen.DrawTriangles(ui.vertices, ui.indices, whiteSubImage, op)
+}
+
+func (ui *UI) drawUncheckedCheckbox(screen *ebiten.Image, cb *Checkbox) {
+	path := createRoundedPath(float32(cb.box.w), float32(cb.box.h))
+	ops := createStrokeOptions()
+	ui.vertices, ui.indices = path.AppendVerticesAndIndicesForStroke(ui.vertices[:0], ui.indices[:0], ops)
+	ui.setVertices(cb.color, cb.box.x, cb.box.y)
+	op := createTrianglesOptions()
+	screen.DrawTriangles(ui.vertices, ui.indices, whiteSubImage, op)
+}
+
+func createPath() (path vector.Path) {
+	path.MoveTo(6, 13+btnMy)
+	path.LineTo(14, 19+btnMy)
+	path.LineTo(23, 7+btnMy)
+	return
+}
+
+func createCheckboxStrokeOptions() (ops *vector.StrokeOptions) {
+	ops = &vector.StrokeOptions{}
+	ops.Width = 4
+	ops.LineJoin = vector.LineJoinMiter
+	ops.LineCap = vector.LineCapRound
+	return
 }

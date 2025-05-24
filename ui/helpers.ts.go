@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"math"
 )
@@ -54,20 +55,29 @@ func createRoundedPath(w, h float32) (path vector.Path) {
 
 	// top left corner + top line
 	path.Arc(r+ds, r+bm+ds, r, a180, a270, 0)
-	path.MoveTo(r+ds, bm+ds)
 	path.LineTo(w-r-ds, bm+ds)
 	// top right corner + right line
 	path.Arc(w-r-ds, bm+r+ds, r, a270, a360, 0)
-	path.MoveTo(w-ds, bm+r+ds)
 	path.LineTo(w-ds, bm+h-r-ds)
 	// bottom right corner + bottom line
 	path.Arc(w-r-ds, bm+h-r-ds, r, 0, a90, 0)
-	path.MoveTo(w-r-ds, bm+h-ds)
 	path.LineTo(r+ds, bm+h-ds)
 	// bottom left corner + left line
 	path.Arc(r+ds, bm+h-r-ds, r, a90, a180, 0)
-	path.MoveTo(ds, bm+h-r-ds)
 	path.LineTo(ds, r+bm+ds)
 	path.Close()
 	return
+}
+
+func createStrokeOptions() *vector.StrokeOptions {
+	ops := &vector.StrokeOptions{}
+	ops.Width = strokeWidth
+	ops.LineJoin = vector.LineJoinMiter
+	return ops
+}
+
+func createTrianglesOptions() *ebiten.DrawTrianglesOptions {
+	op := &ebiten.DrawTrianglesOptions{}
+	op.FillRule = ebiten.FillRuleNonZero
+	return op
 }

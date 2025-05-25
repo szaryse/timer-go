@@ -18,6 +18,9 @@ func init() {
 	whiteImage.Fill(color.White)
 }
 
+type ButtonsArray [11]Button
+type CheckboxArray [1]CheckBox
+
 const (
 	fontSize     = 24  // line height (31.5) = 24 + (2*4)
 	vx           = 270 // value x
@@ -29,28 +32,28 @@ const (
 	strokeWidth  = 2
 )
 
-func (ui *UI) RenderSettingView(screen *ebiten.Image, timer *timer.Timer) {
-	ui.renderRow(screen, 0, "Starting in", timer.StartInTime)
-	ui.renderRow(screen, 1, "Session number", timer.SessionNumber)
-	ui.renderRow(screen, 2, "Focus time", timer.FocusTime)
-	ui.renderRow(screen, 3, "Break time", timer.BreakTime)
-	ui.renderRowWithoutButtons(screen, 4, "Stream time", timer.StreamTime)
+func (ui *UI) RenderSettingView(screen *ebiten.Image, t *timer.Timer) {
+	ui.renderRow(screen, 0, "Starting in", t.StartInTime)
+	ui.renderRow(screen, 1, "Session number", t.SessionNumber)
+	ui.renderRow(screen, 2, "Focus time", t.FocusTime)
+	ui.renderRow(screen, 3, "Break time", t.BreakTime)
+	ui.renderRowWithoutButtons(screen, 4, "Stream time", t.StreamTime)
 	ui.renderRowWithCheckbox(screen, 5, "Stream time only")
-	ui.drawButton(screen, 8)
-	if ui.beforeStart {
-		ui.drawButton(screen, 9)
+	ui.renderButton(screen, 8)
+	if t.IsRunning == false {
+		ui.renderButton(screen, 9)
 	} else {
-		ui.drawButton(screen, 10)
+		ui.renderButton(screen, 10)
 	}
 }
 
 func (ui *UI) renderRow(screen *ebiten.Image, rowIndex int, label string, value int) {
 	rowY := float64(calcRowY(rowIndex))
 	renderText(screen, leftX, rowY, label)
-	ui.drawButton(screen, 2*rowIndex)
+	ui.renderButton(screen, 2*rowIndex)
 	valueStr := formatValue(value, label)
 	renderCenteredText(screen, vx, rowY, valueWidth, valueStr)
-	ui.drawButton(screen, 2*rowIndex+1)
+	ui.renderButton(screen, 2*rowIndex+1)
 }
 
 func (ui *UI) renderRowWithoutButtons(screen *ebiten.Image, rowIndex int, label string, value int) {
@@ -64,71 +67,6 @@ func (ui *UI) renderRowWithCheckbox(screen *ebiten.Image, rowIndex int, label st
 	rowY := float64(calcRowY(rowIndex))
 	renderText(screen, leftX, rowY, label)
 	ui.drawCheckbox(screen)
-}
-
-func (ui *UI) handleClickOnSettings() {
-	cursorX, cursorY := ebiten.CursorPosition()
-	for idx := range ui.SettingsButtons {
-		if checkIsElementSelected(cursorX, cursorY, &ui.SettingsButtons[idx].box) {
-			ui.selectAction(&ui.SettingsButtons[idx])
-		}
-	}
-	for idx := range ui.Checkboxes {
-		if checkIsElementSelected(cursorX, cursorY, &ui.Checkboxes[idx].box) {
-			ui.isStreamOnly = !ui.isStreamOnly
-			ui.Checkboxes[idx].isChecked = ui.isStreamOnly
-		}
-	}
-}
-
-func (ui *UI) selectAction(button *Button) {
-	switch button.action {
-	case "start":
-		if ui.beforeStart {
-			ui.SelectedAction = button.action
-			ui.changeView()
-		}
-	case "changeView":
-		if ui.beforeStart == false {
-			ui.changeView()
-		}
-	default:
-		ui.SelectedAction = button.action
-	}
-}
-
-func (ui *UI) hoverElement() {
-	cursorX, cursorY := ebiten.CursorPosition()
-	buttonIdx := -1
-	checkboxIdx := -1
-	for idx := range ui.SettingsButtons {
-		if checkIsElementSelected(cursorX, cursorY, &ui.SettingsButtons[idx].box) {
-			if ui.SettingsButtons[idx].color == PrimaryColor {
-				ui.SettingsButtons[idx].color = SelectedColor
-			}
-			if ui.beforeStart &&
-				(ui.SettingsButtons[idx].label == "Start" ||
-					ui.SettingsButtons[idx].label == "Timer") {
-				buttonIdx = 9
-			} else if !ui.beforeStart &&
-				(ui.SettingsButtons[idx].label == "Start" ||
-					ui.SettingsButtons[idx].label == "Timer") {
-				buttonIdx = 10
-			} else {
-				buttonIdx = idx
-			}
-		}
-	}
-	ui.clearHoverOnButtons(buttonIdx)
-	for idx := range ui.Checkboxes {
-		if checkIsElementSelected(cursorX, cursorY, &ui.Checkboxes[idx].box) {
-			if ui.Checkboxes[idx].color == PrimaryColor {
-				ui.Checkboxes[idx].color = SelectedColor
-			}
-			checkboxIdx = idx
-		}
-	}
-	ui.clearHoverOnCheckbox(checkboxIdx)
 }
 
 func (ui *UI) clearHoverOnButtons(selectedIdx int) {
@@ -159,13 +97,6 @@ func (ui *UI) setVertices(color color.Color, x, y int) {
 		ui.vertices[i].ColorB = float32(b) / float32(0xffff)
 		ui.vertices[i].ColorA = float32(a) / float32(0xffff)
 	}
-}
-
-func checkIsElementSelected(cursorX, cursorY int, box *uiRect) bool {
-	return cursorX > box.x &&
-		cursorX < box.x+box.w &&
-		cursorY > box.y+btnMy &&
-		cursorY < box.y+box.h+btnMy
 }
 
 func renderText(screen *ebiten.Image, x, y float64, label string) {
@@ -202,5 +133,38 @@ func formatValue(value int, label string) (valueStr string) {
 	} else {
 		valueStr = formatTime(value)
 	}
+	return
+}
+
+func CreateButtons() ButtonsArray {
+	var buttons ButtonsArray
+	buttons[0] = NewButton(btnLx, "+")    // increase start
+	buttons[1] = NewButton(btnRx, "-")    // decrease start
+	buttons[2] = NewButton(btnLx, "+")    // increase session
+	buttons[3] = NewButton(btnRx, "-")    // decrease session
+	buttons[4] = NewButton(btnLx, "+")    // increase focus
+	buttons[5] = NewButton(btnRx, "-")    // decrease focus
+	buttons[6] = NewButton(btnLx, "+")    // increase break
+	buttons[7] = NewButton(btnRx, "-")    // decrease break
+	buttons[8] = NewButton(70, "Exit")    // exit
+	buttons[9] = NewButton(260, "Start")  // start
+	buttons[10] = NewButton(260, "Timer") // change view
+
+	for idx := range buttons {
+		buttons[idx].box.w = buttonWidth
+		buttons[idx].box.y = calcRowY(idx / 2)
+	}
+
+	actionButtons := buttons[8:]
+	for idx := range actionButtons {
+		actionButtons[idx].box.w = textBtnWidth
+		actionButtons[idx].box.y = actionBtnY
+	}
+
+	return buttons
+}
+
+func CreateCheckboxes() (checkboxes CheckboxArray) {
+	checkboxes[0] = NewCheckbox()
 	return
 }

@@ -2,6 +2,7 @@ package ui
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image/color"
 )
@@ -15,55 +16,55 @@ const (
 )
 
 type Button struct {
-	box    uiRect
-	label  string
-	action string
-	color  color.Color
+	box       uiRect
+	label     string
+	color     color.Color
+	mouseDown bool
+	onPressed func(b *Button)
 }
 
-type ButtonsArray [11]Button
+func (b *Button) SetOnPressed(f func(b *Button)) {
+	b.onPressed = f
+}
 
-func createButton(x int, label, action string) Button {
+func (b *Button) Update() error {
+	cursorX, cursorY := ebiten.CursorPosition()
+	isSelected := checkElementIsSelected(cursorX, cursorY, &b.box)
+
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		b.mouseDown = isSelected
+	} else {
+		if b.mouseDown {
+			if b.onPressed != nil {
+				b.onPressed(b)
+			}
+		}
+		b.mouseDown = false
+	}
+
+	if isSelected {
+		b.color = SelectedColor
+	} else {
+		b.color = PrimaryColor
+	}
+
+	return nil
+}
+
+func NewButton(x int, label string) Button {
 	return Button{
-		uiRect{x,
+		box: uiRect{
+			x,
 			0,
 			0,
-			buttonHeight},
-		label,
-		action,
-		PrimaryColor,
+			buttonHeight,
+		},
+		label: label,
+		color: PrimaryColor,
 	}
 }
 
-func createSettingsButtons() ButtonsArray {
-	var buttons ButtonsArray
-	buttons[0] = createButton(btnLx, "+", "increaseStart")
-	buttons[1] = createButton(btnRx, "-", "decreaseStart")
-	buttons[2] = createButton(btnLx, "+", "increaseSession")
-	buttons[3] = createButton(btnRx, "-", "decreaseSession")
-	buttons[4] = createButton(btnLx, "+", "increaseFocus")
-	buttons[5] = createButton(btnRx, "-", "decreaseFocus")
-	buttons[6] = createButton(btnLx, "+", "increaseBreak")
-	buttons[7] = createButton(btnRx, "-", "decreaseBreak")
-	buttons[8] = createButton(70, "Exit", "exit")
-	buttons[9] = createButton(260, "Start", "start")
-	buttons[10] = createButton(260, "Timer", "changeView")
-
-	for idx := range buttons {
-		buttons[idx].box.w = buttonWidth
-		buttons[idx].box.y = calcRowY(idx / 2)
-	}
-
-	actionButtons := buttons[8:]
-	for idx := range actionButtons {
-		actionButtons[idx].box.w = textBtnWidth
-		actionButtons[idx].box.y = actionBtnY
-	}
-
-	return buttons
-}
-
-func (ui *UI) drawButton(screen *ebiten.Image, idx int) {
+func (ui *UI) renderButton(screen *ebiten.Image, idx int) {
 	btn := ui.SettingsButtons[idx]
 	path := createRoundedPath(float32(btn.box.w), float32(btn.box.h))
 	ops := createStrokeOptions()
@@ -84,7 +85,7 @@ func renderButtonText(screen *ebiten.Image, x, y, w float64, label string) {
 	labelWidth, labelHeight := text.Measure(label, textFace, 0)
 	x += (w - labelWidth) / 2
 	y += ((buttonHeight - labelHeight) / 2) + btnMy + (strokeWidth / 2)
-
+	
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(x, y)
 	op.ColorScale.ScaleWithColor(TextColor)

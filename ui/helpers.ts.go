@@ -81,3 +81,10 @@ func createTrianglesOptions() *ebiten.DrawTrianglesOptions {
 	op.FillRule = ebiten.FillRuleNonZero
 	return op
 }
+
+func checkElementIsSelected(cursorX, cursorY int, box *uiRect) bool {
+	return cursorX > box.x &&
+		cursorX < box.x+box.w &&
+		cursorY > box.y+btnMy &&
+		cursorY < box.y+box.h+btnMy
+}

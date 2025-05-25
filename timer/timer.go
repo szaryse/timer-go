@@ -12,7 +12,8 @@ const (
 type ActivityState int
 
 const (
-	StartingInState ActivityState = iota
+	Init ActivityState = iota
+	StartingInState
 	FocusState
 	BreakState
 	TimeoutState
@@ -36,7 +37,7 @@ func NewTimer() (timer Timer) {
 		SessionNumber: sessionNumber,
 		FocusTime:     focusTime,
 		BreakTime:     breakTime,
-		Activity:      StartingInState,
+		Activity:      Init,
 	}
 	streamTime := (sessionNumber * (focusTime + breakTime)) + startInTime
 	timer.StreamTime = streamTime
@@ -54,34 +55,56 @@ func (t *Timer) Update() error {
 	return nil
 }
 
-func (t *Timer) HandleAction(action string) {
-	switch action {
-	case "increaseStart":
-		t.StartInTime = setTime(t.StartInTime + 60)
-	case "decreaseStart":
-		t.StartInTime = setTime(t.StartInTime - 60)
-	case "increaseSession":
-		t.SessionNumber = limitSession(t.SessionNumber + 1)
-	case "decreaseSession":
-		t.SessionNumber = limitSession(t.SessionNumber - 1)
-	case "increaseFocus":
-		t.FocusTime = setTime(t.FocusTime + 60)
-	case "decreaseFocus":
-		t.FocusTime = setTime(t.FocusTime - 60)
-	case "increaseBreak":
-		t.BreakTime = setTime(t.BreakTime + 60)
-	case "decreaseBreak":
-		t.BreakTime = setTime(t.BreakTime - 60)
-	case "start":
-		t.IsRunning = true
-		t.Count = t.StartInTime * Tick
-		t.TotalCount = t.StreamTime * Tick
-	}
+func (t *Timer) IncreaseStart() {
+	t.StartInTime = setTime(t.StartInTime + 60)
 	t.calcStreamTime()
+}
+
+func (t *Timer) DecreaseStart() {
+	t.StartInTime = setTime(t.StartInTime - 60)
+	t.calcStreamTime()
+}
+
+func (t *Timer) IncreaseSession() {
+	t.SessionNumber = limitSession(t.SessionNumber + 1)
+	t.calcStreamTime()
+}
+
+func (t *Timer) DecreaseSession() {
+	t.SessionNumber = limitSession(t.SessionNumber - 1)
+	t.calcStreamTime()
+}
+
+func (t *Timer) IncreaseFocus() {
+	t.FocusTime = setTime(t.FocusTime + 60)
+	t.calcStreamTime()
+}
+
+func (t *Timer) DecreaseFocus() {
+	t.FocusTime = setTime(t.FocusTime - 60)
+	t.calcStreamTime()
+}
+
+func (t *Timer) IncreaseBreak() {
+	t.BreakTime = setTime(t.BreakTime + 60)
+	t.calcStreamTime()
+}
+
+func (t *Timer) DecreaseBreak() {
+	t.BreakTime = setTime(t.BreakTime - 60)
+	t.calcStreamTime()
+}
+
+func (t *Timer) HandleStart() {
+	t.IsRunning = true
+	t.Count = t.StartInTime * Tick
+	t.TotalCount = t.StreamTime * Tick
 }
 
 func (t *Timer) changeTimerState() {
 	switch t.Activity {
+	case Init:
+		return
 	case StartingInState:
 		t.Activity = FocusState
 		t.Count = focusTime * Tick

@@ -13,10 +13,7 @@ func main() {
 	ebiten.SetWindowFloating(true)
 	op := &ebiten.RunGameOptions{}
 	op.ScreenTransparent = true
-
-	newApp := app.NewApp()
-
-	if err := ebiten.RunGameWithOptions(&newApp, op); err != nil {
+	if err := ebiten.RunGameWithOptions(app.NewApp(), op); err != nil {
 		log.Fatal(err)
 	}
 }

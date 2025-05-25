@@ -76,8 +76,9 @@ func setSessionLabel(activity timer.ActivityState, session int) string {
 		return "Break time "
 	case timer.TimeoutState:
 		return "Timeout "
+	default:
+		return ""
 	}
-	return ""
 }
 
 func setTimeColor(time int) color.RGBA {

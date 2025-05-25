@@ -65,20 +65,17 @@ type UI struct {
 	WindowPositionY int
 	SettingsButtons ButtonsArray
 	SelectedAction  string
-	beforeStart     bool
 	Checkboxes      CheckboxArray
 	isStreamOnly    bool
 	vertices        []ebiten.Vertex
 	indices         []uint16
 }
 
-func CreateUI() UI {
-	return UI{
-		CurrentView:     SettingsView,
-		SettingsButtons: createSettingsButtons(),
-		beforeStart:     true,
-		Checkboxes:      createCheckbox(),
+func CreateUI() (ui UI) {
+	ui = UI{
+		CurrentView: SettingsView,
 	}
+	return
 }
 
 func (ui *UI) Render(screen *ebiten.Image, t *timer.Timer) {
@@ -92,36 +89,29 @@ func (ui *UI) Render(screen *ebiten.Image, t *timer.Timer) {
 }
 
 func (ui *UI) Update() error {
-	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		if ui.CurrentView == TimerView {
-			ui.changeView()
-		}
-		if ui.CurrentView == SettingsView {
-			ui.handleClickOnSettings()
-		}
-	}
 	if ui.CurrentView == SettingsView {
-		ui.hoverElement()
+		for idx := range ui.SettingsButtons {
+			err := ui.SettingsButtons[idx].Update()
+			if err != nil {
+				return err
+			}
+		}
+		for idx := range ui.Checkboxes {
+			err := ui.Checkboxes[idx].Update()
+			if err != nil {
+				return err
+			}
+		}
 	}
+
+	if ui.CurrentView == TimerView && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		ui.ChangeView()
+	}
+
 	return nil
 }
 
-func (ui *UI) ActionUpdate(t *timer.Timer) error {
-	action := ui.SelectedAction
-	if len(action) > 0 {
-		if action == "exit" {
-			return ebiten.Termination
-		}
-		t.HandleAction(action)
-		if action == "start" {
-			ui.beforeStart = false
-		}
-		ui.SelectedAction = ""
-	}
-	return nil
-}
-
-func (ui *UI) changeView() {
+func (ui *UI) ChangeView() {
 	ui.WindowPositionX, ui.WindowPositionY = ebiten.WindowPosition()
 
 	switch ui.CurrentView {
@@ -137,4 +127,8 @@ func (ui *UI) changeView() {
 		panic(fmt.Errorf("unknown state: %q", ui.CurrentView))
 	}
 	ebiten.SetWindowPosition(ui.WindowPositionX, ui.WindowPositionY)
+}
+
+func (ui *UI) ChangeTimerMode() {
+	ui.isStreamOnly = !ui.isStreamOnly
 }

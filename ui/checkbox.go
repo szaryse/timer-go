@@ -2,20 +2,25 @@ package ui
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"image/color"
 )
 
-type Checkbox struct {
-	box       uiRect
-	isChecked bool
-	color     color.RGBA
+type CheckBox struct {
+	box            uiRect
+	isChecked      bool
+	color          color.RGBA
+	mouseDown      bool
+	onCheckChanged func(c *CheckBox)
 }
 
-type CheckboxArray [1]Checkbox
+func (c *CheckBox) SetOnCheckChanged(f func(c *CheckBox)) {
+	c.onCheckChanged = f
+}
 
-func createCheckbox() (checkboxes CheckboxArray) {
-	checkboxes[0] = Checkbox{
+func NewCheckbox() CheckBox {
+	return CheckBox{
 		box: uiRect{vx + (valueWidth / 2) - (buttonWidth / 2),
 			calcRowY(5),
 			buttonWidth,
@@ -24,7 +29,31 @@ func createCheckbox() (checkboxes CheckboxArray) {
 		isChecked: false,
 		color:     PrimaryColor,
 	}
-	return
+}
+
+func (c *CheckBox) Update() error {
+	cursorX, cursorY := ebiten.CursorPosition()
+	isSelected := checkElementIsSelected(cursorX, cursorY, &c.box)
+
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		c.mouseDown = isSelected
+	} else {
+		if c.mouseDown {
+			c.isChecked = !c.isChecked
+			if c.onCheckChanged != nil {
+				c.onCheckChanged(c)
+			}
+		}
+		c.mouseDown = false
+	}
+
+	if isSelected {
+		c.color = SelectedColor
+	} else {
+		c.color = PrimaryColor
+	}
+
+	return nil
 }
 
 func (ui *UI) drawCheckbox(screen *ebiten.Image) {
@@ -37,7 +66,7 @@ func (ui *UI) drawCheckbox(screen *ebiten.Image) {
 	}
 }
 
-func (ui *UI) drawFilledBackground(screen *ebiten.Image, cb *Checkbox) {
+func (ui *UI) drawFilledBackground(screen *ebiten.Image, cb *CheckBox) {
 	path := createRoundedPath(float32(cb.box.w), float32(cb.box.h))
 	ui.vertices, ui.indices = path.AppendVerticesAndIndicesForFilling(ui.vertices[:0], ui.indices[:0])
 	ui.setVertices(cb.color, cb.box.x, cb.box.y)
@@ -45,7 +74,7 @@ func (ui *UI) drawFilledBackground(screen *ebiten.Image, cb *Checkbox) {
 	screen.DrawTriangles(ui.vertices, ui.indices, whiteSubImage, op)
 }
 
-func (ui *UI) drawCheckboxLines(screen *ebiten.Image, cb *Checkbox) {
+func (ui *UI) drawCheckboxLines(screen *ebiten.Image, cb *CheckBox) {
 	path := createPath()
 	ops := createCheckboxStrokeOptions()
 	ui.vertices, ui.indices = path.AppendVerticesAndIndicesForStroke(ui.vertices[:0], ui.indices[:0], ops)
@@ -54,7 +83,7 @@ func (ui *UI) drawCheckboxLines(screen *ebiten.Image, cb *Checkbox) {
 	screen.DrawTriangles(ui.vertices, ui.indices, whiteSubImage, op)
 }
 
-func (ui *UI) drawUncheckedCheckbox(screen *ebiten.Image, cb *Checkbox) {
+func (ui *UI) drawUncheckedCheckbox(screen *ebiten.Image, cb *CheckBox) {
 	path := createRoundedPath(float32(cb.box.w), float32(cb.box.h))
 	ops := createStrokeOptions()
 	ui.vertices, ui.indices = path.AppendVerticesAndIndicesForStroke(ui.vertices[:0], ui.indices[:0], ops)

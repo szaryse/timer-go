@@ -66,7 +66,7 @@ type UI struct {
 	SettingsButtons ButtonsArray
 	SelectedAction  string
 	Checkboxes      CheckboxArray
-	isStreamOnly    bool
+	isOneLineView   bool
 	vertices        []ebiten.Vertex
 	indices         []uint16
 }
@@ -130,5 +130,5 @@ func (ui *UI) ChangeView() {
 }
 
 func (ui *UI) ChangeTimerMode() {
-	ui.isStreamOnly = !ui.isStreamOnly
+	ui.isOneLineView = !ui.isOneLineView
 }

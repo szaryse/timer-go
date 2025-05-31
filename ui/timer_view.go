@@ -21,22 +21,49 @@ func (ui *UI) RenderTimerView(screen *ebiten.Image, t *timer.Timer) {
 		Source: silkscreenSource,
 		Size:   24.21875,
 	}
-	if ui.isStreamOnly == false {
-		renderLabel(screen, textFace, t, "", row1y)
-		renderTimeValue(screen, textFace, t.Count, row1y, formatTime)
+	if ui.isOneLineView {
+		ui.renderOneLine(screen, t, textFace)
+	} else {
+		ui.renderTwoLines(screen, t, textFace)
 	}
+}
+
+func (ui *UI) renderTwoLines(screen *ebiten.Image, t *timer.Timer, textFace *text.GoTextFace) {
+	renderLabel(screen, textFace, t, "", row1y, TextColor)
+	renderTimeValue(screen, textFace, t.Count, row1y, formatTime)
 	y := row2y
-	if ui.isStreamOnly {
-		y = row2y / 2
-	}
-	renderLabel(screen, textFace, t, "Stream time ", y)
+	renderLabel(screen, textFace, t, Subtitles["StreamTime"], y, TextColor)
 	renderTimeValue(screen, textFace, t.TotalCount, y, getTimeString)
 }
 
-func renderLabel(screen *ebiten.Image, textFace *text.GoTextFace, t *timer.Timer, label string, y float64) {
+func (ui *UI) renderOneLine(screen *ebiten.Image, t *timer.Timer, textFace *text.GoTextFace) {
+	time := t.TotalCount
+	if t.Activity == timer.StartingInState {
+		time = t.Count
+	}
+	timeInt := time / timer.Tick
+	timeColor := setTimeColor(timeInt)
+
+	var label string
+	switch t.Activity {
+	case timer.StartingInState:
+		label = Subtitles["StartingInState"]
+	case timer.TimeoutState:
+		label = Subtitles["Timeout"]
+	default:
+		label = Subtitles["StreamTime"]
+	}
+
+	y := row2y / 2
+	renderLabel(screen, textFace, t, label, y, timeColor)
+	renderTimeValue(screen, textFace, time, y, getTimeString)
+}
+
+func renderLabel(screen *ebiten.Image, textFace *text.GoTextFace, t *timer.Timer,
+	label string, y float64, color color.Color) {
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(fontX, y)
-	op.ColorScale.ScaleWithColor(TextColor)
+	op.ColorScale.ScaleWithColor(color)
 	if len(label) == 0 {
 		label = setSessionLabel(t.Activity, t.SessionNumber)
 	}
@@ -65,17 +92,17 @@ func getTimeString(timeInt int) (timeString string) {
 func setSessionLabel(activity timer.ActivityState, session int) string {
 	switch activity {
 	case timer.StartingInState:
-		return "Starting in "
+		return Subtitles["StartingIn"]
 	case timer.FocusState:
 		if session > 1 {
-			return fmt.Sprintf("Focus time %d", session)
+			return Subtitles["FocusTime"] + fmt.Sprintf(" %d", session)
 		} else {
-			return "Last session "
+			return Subtitles["LastSession"]
 		}
 	case timer.BreakState:
-		return "Break time "
+		return Subtitles["BreakTime"]
 	case timer.TimeoutState:
-		return "Timeout "
+		return Subtitles["Timeout"]
 	default:
 		return ""
 	}

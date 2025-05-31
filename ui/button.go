@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	textBtnWidth = 100
+	textBtnWidth = 120
 	actionBtnY   = 205
 	btnFontSize  = 18
 	btnRx        = 397 // button right x

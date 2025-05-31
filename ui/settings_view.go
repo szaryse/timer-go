@@ -33,12 +33,12 @@ const (
 )
 
 func (ui *UI) RenderSettingView(screen *ebiten.Image, t *timer.Timer) {
-	ui.renderRow(screen, 0, "Starting in", t.StartInTime)
-	ui.renderRow(screen, 1, "Session number", t.SessionNumber)
-	ui.renderRow(screen, 2, "Focus time", t.FocusTime)
-	ui.renderRow(screen, 3, "Break time", t.BreakTime)
-	ui.renderRowWithoutButtons(screen, 4, "Stream time", t.StreamTime)
-	ui.renderRowWithCheckbox(screen, 5, "Stream time only")
+	ui.renderRow(screen, 0, Subtitles["StartingIn"], t.StartInTime)
+	ui.renderRow(screen, 1, Subtitles["SessionNumber"], t.SessionNumber)
+	ui.renderRow(screen, 2, Subtitles["FocusTime"], t.FocusTime)
+	ui.renderRow(screen, 3, Subtitles["BreakTime"], t.BreakTime)
+	ui.renderRowWithoutButtons(screen, 4, Subtitles["StreamTime"], t.StreamTime)
+	ui.renderRowWithCheckbox(screen, 5, Subtitles["OneLineView"])
 	ui.renderButton(screen, 8)
 	if t.IsRunning == false {
 		ui.renderButton(screen, 9)
@@ -126,9 +126,9 @@ func renderCenteredText(screen *ebiten.Image, x, y, w float64, label string) {
 }
 
 func formatValue(value int, label string) (valueStr string) {
-	if label == "Session number" {
+	if label == Subtitles["SessionNumber"] {
 		valueStr = fmt.Sprintf("%d", value)
-	} else if label == "Stream time" {
+	} else if label == Subtitles["StreamTime"] {
 		valueStr = formatFullTime(value)
 	} else {
 		valueStr = formatTime(value)
@@ -138,17 +138,17 @@ func formatValue(value int, label string) (valueStr string) {
 
 func CreateButtons() ButtonsArray {
 	var buttons ButtonsArray
-	buttons[0] = NewButton(btnLx, "+")    // increase start
-	buttons[1] = NewButton(btnRx, "-")    // decrease start
-	buttons[2] = NewButton(btnLx, "+")    // increase session
-	buttons[3] = NewButton(btnRx, "-")    // decrease session
-	buttons[4] = NewButton(btnLx, "+")    // increase focus
-	buttons[5] = NewButton(btnRx, "-")    // decrease focus
-	buttons[6] = NewButton(btnLx, "+")    // increase break
-	buttons[7] = NewButton(btnRx, "-")    // decrease break
-	buttons[8] = NewButton(70, "Exit")    // exit
-	buttons[9] = NewButton(260, "Start")  // start
-	buttons[10] = NewButton(260, "Timer") // change view
+	buttons[0] = NewButton(btnLx, "+") // increase start
+	buttons[1] = NewButton(btnRx, "-") // decrease start
+	buttons[2] = NewButton(btnLx, "+") // increase session
+	buttons[3] = NewButton(btnRx, "-") // decrease session
+	buttons[4] = NewButton(btnLx, "+") // increase focus
+	buttons[5] = NewButton(btnRx, "-") // decrease focus
+	buttons[6] = NewButton(btnLx, "+") // increase break
+	buttons[7] = NewButton(btnRx, "-") // decrease break
+	buttons[8] = NewButton(55, Subtitles["Exit"])
+	buttons[9] = NewButton(268, Subtitles["Start"])
+	buttons[10] = NewButton(268, Subtitles["Timer"]) // change view
 
 	for idx := range buttons {
 		buttons[idx].box.w = buttonWidth

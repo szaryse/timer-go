@@ -9,7 +9,7 @@ import (
 
 func main() {
 	ebiten.SetWindowSize(ui.SettingsWidth, ui.SettingsHeight)
-	ebiten.SetWindowTitle("Timer Go v0.1")
+	ebiten.SetWindowTitle("Timer 2 v1.0")
 	ebiten.SetWindowFloating(true)
 	op := &ebiten.RunGameOptions{}
 	op.ScreenTransparent = true

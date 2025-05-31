@@ -107,14 +107,14 @@ func (t *Timer) changeTimerState() {
 		return
 	case StartingInState:
 		t.Activity = FocusState
-		t.Count = focusTime * Tick
+		t.Count = t.FocusTime * Tick
 	case FocusState:
 		t.Activity = BreakState
-		t.Count = breakTime * Tick
+		t.Count = t.BreakTime * Tick
 	case BreakState:
-		if t.SessionNumber > 0 {
+		if t.SessionNumber > 1 {
 			t.Activity = FocusState
-			t.Count = focusTime * Tick
+			t.Count = t.FocusTime * Tick
 			t.SessionNumber -= 1
 		} else {
 			t.Activity = TimeoutState

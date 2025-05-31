@@ -12,6 +12,20 @@ const (
 	py       = 4 // padding y
 )
 
+var Subtitles = map[string]string{
+	"StartingIn":    "Zaczynamy",
+	"SessionNumber": "Liczba sesji",
+	"FocusTime":     "Skupienie",
+	"BreakTime":     "Przerwa",
+	"StreamTime":    "Transmisja",
+	"OneLineView":   "Jedna linia",
+	"Exit":          "Wyjście",
+	"Start":         "Start",
+	"Timer":         "Minutnik",
+	"LastSession":   "Koniec",
+	"Timeout":       "Nadgodziny", //
+}
+
 func calcRowY(idx int) int {
 	return py + (idx*fontSize + (idx * my * 2))
 }

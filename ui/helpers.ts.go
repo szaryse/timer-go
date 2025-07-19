@@ -36,7 +36,11 @@ func formatTime(time int) string {
 	}
 	minutes := time / 60
 	seconds := time - minutes*60
-	minutesStr := fmt.Sprintf("%2d", minutes)
+	format := "%2d"
+	if minutes < 10 {
+		format = "%1d"
+	}
+	minutesStr := fmt.Sprintf(format, minutes)
 	secondsStr := fmt.Sprintf("%02d", seconds)
 	return fmt.Sprintf("%s:%s", minutesStr, secondsStr)
 }

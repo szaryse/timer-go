@@ -12,7 +12,7 @@ import (
 	"log"
 )
 
-//go:embed ..\assets\fonts\FiraCodeRegular.ttf
+//go:embed ..\assets\fonts\FiraCode-Regular.ttf
 var FiraCodeRegular []byte
 var firaCodeSource *text.GoTextFaceSource
 
@@ -24,16 +24,16 @@ func init() {
 	firaCodeSource = fcs
 }
 
-//go:embed ..\assets\fonts\SilkscreenRegular.ttf
-var SilkscreenRegular []byte
-var silkscreenSource *text.GoTextFaceSource
+//go:embed ..\assets\fonts\FiraCode-Medium.ttf
+var FiraCodeMedium []byte
+var firaCodeMSource *text.GoTextFaceSource
 
 func init() {
-	ds, err := text.NewGoTextFaceSource(bytes.NewReader(SilkscreenRegular))
+	fcs, err := text.NewGoTextFaceSource(bytes.NewReader(FiraCodeMedium))
 	if err != nil {
 		log.Fatal(err)
 	}
-	silkscreenSource = ds
+	firaCodeMSource = fcs
 }
 
 type ViewState int
@@ -44,19 +44,20 @@ const (
 )
 
 const (
-	SettingsWidth  = 440
-	SettingsHeight = 250
-	TimerWidth     = 360
-	BgPadding      = 4
-	TimerHeight    = 54 + 2*BgPadding
-	leftX          = 10 // left padding x (inside background)
+	SettingsWidth    = 440
+	SettingsHeight   = 250
+	TimerWidth       = 360
+	BgPadding        = 4
+	timerInnerHeight = 54
+	TimerHeight      = timerInnerHeight + 2*BgPadding
+	leftX            = 10 // left padding x (inside background)
 )
 
 var (
-	TextColor     = color.RGBA{R: 0x80, G: 0x80, B: 0x80, A: 0xff}
+	TextColor     = color.RGBA{R: 0xa0, G: 0xa0, B: 0xa0, A: 0xff}
 	PrimaryColor  = color.RGBA{R: 0x00, G: 0x80, B: 0x00, A: 0xff}
 	SelectedColor = color.RGBA{R: 0x00, G: 0xe0, B: 0x00, A: 0xff}
-	bgColor       = color.RGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xcc}
+	bgColor       = color.RGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xd7}
 )
 
 type UI struct {

@@ -12,14 +12,14 @@ import (
 
 const (
 	fontX float64 = 16
-	row1y float64 = 0
-	row2y float64 = 27
+	row1y float64 = BgPadding
+	row2y float64 = BgPadding + timerInnerHeight/2
 )
 
 func (ui *UI) RenderTimerView(screen *ebiten.Image, t *timer.Timer) {
 	textFace := &text.GoTextFace{
-		Source: silkscreenSource,
-		Size:   24.21875,
+		Source: firaCodeMSource,
+		Size:   20.5793, // ratio 1,312
 	}
 	if ui.isOneLineView {
 		ui.renderOneLine(screen, t, textFace)
@@ -44,14 +44,9 @@ func (ui *UI) renderOneLine(screen *ebiten.Image, t *timer.Timer, textFace *text
 	timeInt := time / timer.Tick
 	timeColor := setTimeColor(timeInt)
 
-	var label string
-	switch t.Activity {
-	case timer.StartingInState:
+	label := Subtitles["StreamTime"]
+	if t.Activity == timer.StartingInState {
 		label = Subtitles["StartingInState"]
-	case timer.TimeoutState:
-		label = Subtitles["Timeout"]
-	default:
-		label = Subtitles["StreamTime"]
 	}
 
 	y := row2y / 2
@@ -84,9 +79,14 @@ func renderTimeValue(screen *ebiten.Image, textFace *text.GoTextFace, value int,
 func getTimeString(timeInt int) (timeString string) {
 	if timeInt >= 3600 {
 		return formatFullTime(timeInt)
-	} else {
+	}
+	if timeInt >= 0 {
 		return formatTime(timeInt)
 	}
+	if timeInt > -3600 {
+		return "-" + formatTime(timeInt)
+	}
+	return "-" + formatFullTime(timeInt)
 }
 
 func setSessionLabel(activity timer.ActivityState, session int) string {

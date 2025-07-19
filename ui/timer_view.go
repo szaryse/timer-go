@@ -49,7 +49,9 @@ func (ui *UI) renderOneLine(screen *ebiten.Image, t *timer.Timer, textFace *text
 		label = Subtitles["StartingInState"]
 	}
 
-	y := row2y / 2
+	_, h := text.Measure("123456789012", textFace, 0)
+	y := row2y - (0.5 * h)
+
 	renderLabel(screen, textFace, t, label, y, timeColor)
 	renderTimeValue(screen, textFace, time, y, getTimeString)
 }
@@ -114,19 +116,19 @@ func setTimeColor(time int) color.RGBA {
 
 	switch true {
 	case time <= 20:
-		r, g, b, err = HSLToRGB(0, 1, 0.5) // red
+		r, g, b, err = HSLToRGB(0, 1, 0.6275) // red
 	case time <= 200:
-		r, g, b, err = HSLToRGB(float64(time-20), 1, 0.5) // from cyan to red
+		r, g, b, err = HSLToRGB(float64(time-20), 1, 0.6275) // from cyan to red
 	case time <= 250:
 		s := (250 - float64(time)) / 50
-		r, g, b, err = HSLToRGB(180, s, 0.5) // from grey to cyan
+		r, g, b, err = HSLToRGB(180, s, 0.6275) // from grey to cyan
 	default:
-		r, g, b, err = HSLToRGB(180, 0, 0.5) // grey
+		r, g, b, err = HSLToRGB(180, 0, 0.6275) // grey
 	}
 
 	if err != nil {
 		fmt.Println(err)
-		r, g, b, err = HSLToRGB(180, 0, 0.5)
+		r, g, b, err = HSLToRGB(180, 0, 0.6275)
 	}
 
 	return color.RGBA{R: r, G: g, B: b, A: 0xff}

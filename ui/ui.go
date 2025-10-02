@@ -4,12 +4,13 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"image/color"
+	"log"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/szaryse/timer-go255/timer"
-	"image/color"
-	"log"
 )
 
 //go:embed ..\assets\fonts\FiraCode-Regular.ttf
@@ -46,7 +47,7 @@ const (
 const (
 	SettingsWidth    = 440
 	SettingsHeight   = 250
-	TimerWidth       = 360
+	TimerWidth       = 270
 	BgPadding        = 4
 	timerInnerHeight = 54
 	TimerHeight      = timerInnerHeight + 2*BgPadding
